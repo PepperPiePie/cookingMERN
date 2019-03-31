@@ -52,12 +52,18 @@ h1 {
 .button {
     list-style: none;
     text-decoration: none;
-    background-color: #F06060;
-    color: gainsboro;
-    padding: 0.75em 1em;
-    margin: 2.5em 0 1em 0;
+    border: #F06060 solid 4px !important;
+    color: #F06060;
+    padding: 0.5em 1em;
+    margin: 1.5em 0 1em 0;
     border: 0;
-    font-size: 14px;
+    font-size: 22px;
+    font-weight: bold;
+    transition: 150ms ease-in-out;
+}
+
+.button:hover {
+    background-color: #e2c0c0;
 }
 
 .back {
@@ -65,8 +71,10 @@ h1 {
     text-decoration: none;
     background-color: cadetblue;
     color: gainsboro;
-    padding: 0.75em 2em;
-    margin: 2.5em;
+    padding: 0.5em 2em;
+    margin: 2em 0 2em 2em;
+    font-size: 22px;
+    font-weight: bold;
 }
 
 #description {
@@ -81,12 +89,14 @@ h1 {
     margin: 0.5em;
 }
 #title {
+    font-size: 22px;
+    font-weight: bolder;
     color: lightcoral;
     font-style: italic;
 }
 
 #add {
-    margin-left: 3em;
+    margin-left: 2em;
 }
 
 fieldset {

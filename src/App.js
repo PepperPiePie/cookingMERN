@@ -77,7 +77,9 @@ class App extends Component {
     getRecipeFromId(id) {
         return this.state.recipes.find((elm) => elm._id === id);
     }
-
+    filterByIngredient(ingredient) {
+        return this.state.recipes.filter((elm) => elm.ingredients.includes(ingredient))
+    }
 
     render() {
         return (

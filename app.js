@@ -4,7 +4,6 @@ const app = express();
 app.use(bodyParser.json());
 
 /****** Configuration *****/
-const port = (process.env.PORT || 8080);
 
 // Additional headers to avoid triggering CORS security errors in the browser
 // Read more: https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
@@ -24,9 +23,35 @@ app.use((req, res, next) => {
     }
 });
 
+/****** Mongoose *****/
+const mongoose = require('mongoose');
+mongoose.connect(
+    'mongodb+srv://pepper123:pepper123@testercluster-2ubtg.mongodb.net/test?retryWrites=true',
+    { useNewUrlParser: true }
+    // { useMongoClient: true } no longer needed in Mongoose 5.0, instead see line above
+);
+
+let db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+    console.log("DB connection is open.");
+});
+
+let recipeSchema = new mongoose.Schema({
+    // id: Number,
+    title: String,
+    description: String,
+    ingredients: [String],
+    prep_time: Number,
+    total_time: Number
+});
+
+let Recipe = mongoose.model('Recipe', recipeSchema);
+
+const port = (process.env.PORT || 8080);
+
 /****** Data *****/
-// TODO: Add some data
-const data = [
+/* const data = [
     {
         id: 0,
         title: "Apple pie",
@@ -75,7 +100,7 @@ const data = [
         prep_time: 10,
         total_time: 70
     }
-];
+]; */
 
 /****** Helper functions *****/
 function getRecipeFromId(id) {
@@ -94,60 +119,60 @@ function findNextId() {
 
 /****** Routes *****/
 // GET
-app.get('/recipes', (req, res) => res.json(data));
+app.get('/recipes/', (req, res) => {
+    //res.json(data)
+    Recipe.find({}, (err, recipes) => {
+        res.json(recipes);
+    }).sort({title: 1})
+});
 
 app.get('/recipes/:id', (req, res) => {
-    res.json(data.filter(elm => elm.id === parseInt(req.params.id)));
-    res.json({ msg: `You have sent this id: ${req.params.id}`});
+    //res.json(data.filter(elm => elm.id === parseInt(req.params.id)));
+    //res.json({ msg: `You have sent this id: ${req.params.id}`});
+    Recipe.find({_id: req.params.id}, (err, recipes) => {
+        res.json(recipes);
+    })
 });
 
 app.get('/recipes/with/:ingredients', (req, res) => {
-    res.json(data.filter((elm) => elm.ingredients.includes(req.params.ingredients)));
-    res.json({ msg: `You have sent this ingredient: ${req.params.ingredients}`});
+    //res.json(data.filter((elm) => elm.ingredients.includes(req.params.ingredients)));
+    //res.json({ msg: `You have sent this ingredient: ${req.params.ingredients}`});
+    Recipe.find({ingredients: req.params.ingredients}, (err, recipes) => {
+        res.json(recipes);
+    })
 });
 
 
 // POST
 app.post('/recipes', (req, res) => {
-    // res.send(req.body);
-    const newRecipe = {
-        id: findNextId(),
+    let newRecipe = new Recipe({
+        //id: findNextId(),
         title: req.body.title,
         description: req.body.description,
         ingredients: req.body.ingredients,
         prep_time: req.body.prep_time,
         total_time: req.body.total_time
-    };
+    });
     if(!newRecipe.title || !newRecipe.description || !newRecipe.ingredients || !newRecipe.prep_time || !newRecipe.total_time) {
         return res.status(400).json({ msg: 'Please include title, description, list of ingredients for recipe, as well as preparation and total time' });
     }
-    data.push(newRecipe);
-    // res.json(data);
-    res.json({ msg: `You have posted this recipe: ${req.body.title}`});
+    /*newRecipe.save(err => {
+        if (err) return res.status(500).send(err);
+        return res.status(200).send(newRecipe);
+    });*/
+    newRecipe
+        .save()
+        .then(result => res.json({ msg: `You have posted this recipe: ${req.body.title}`}))
+        .catch(err => console.log(err));
 });
 
 
 // PUT
 app.put('/recipes/:id', (req, res) => {
-
-    // finding object in data by id
-    const found = data.some(elm => elm.id === parseInt(req.params.id));
-
-    if (found) {
-        const updData = req.body;
-        const elm = data[req.params.id];
-
-        elm.name = updData.name ? updData.name : elm.name;
-        elm.description = updData.description ? updData.description : elm.description;
-        elm.ingredients = updData.ingredients ? updData.ingredients : elm.ingredients;
-        elm.prep_time = updData.prep_time ? updData.prep_time : elm.prep_time;
-        elm.total_time = updData.total_time ? updData.total_time : elm.total_time;
-
-        // res.json(data);
-        res.json({ msg: `Recipe ${req.body.title} was updated`})
-    } else {
-        res.status(400).json({ msg: `No task with id ${req.params.id}`})
-    }
+    Recipe.findOneAndUpdate({_id: req.params.id}, req.body, {new: true})
+        .then(function(recipe){res.send(recipe)})
+        .then(console.log(`Recipe ${req.body.title} was updated`))
+        .catch(err => console.log(err))
 });
 
 app.listen(port, () => console.log(`Cooking API running on port ${port}!`));

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import './styles/style.css';
+import logo from './logo.svg';
 
 import RecipeList from "./RecipeList";
 import Recipe from "./Recipe";
@@ -27,7 +28,7 @@ class App extends Component {
     getData() {
         fetch('http://localhost:8080/recipes')
             .then(response => response.json()) // Turn into JSON     )
-            .then(recipes => this.setState({ recipes }))
+            .then(recipes => this.setState({ recipes: recipes }))
 
     }
 
@@ -53,7 +54,7 @@ class App extends Component {
     }
 
     editData(text) {
-        fetch('http://localhost:8080/recipes/'+ text.id, {
+        fetch('http://localhost:8080/recipes/'+ text._id, {
             method: 'PUT',
             body: JSON.stringify({
                 title: text.title,
@@ -74,17 +75,15 @@ class App extends Component {
     }
 
     getRecipeFromId(id) {
-        return this.state.recipes.find((elm) => elm.id === Number(id));
+        return this.state.recipes.find((elm) => elm._id === id);
     }
 
-    filterByIngredient(ingredient) {
-        return this.state.recipes.filter((elm) => elm.ingredients.includes(ingredient))
-    }
 
     render() {
         return (
             <Router>
                 <div className="container">
+                    <img src={logo} className="logo" alt="logo" />
                     <h1 className="text">Cooking Recipes</h1>
 
                     <Switch>

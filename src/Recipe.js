@@ -33,7 +33,7 @@ class Recipe extends Component {
                     {list}
                 </ul>
 
-                <Link className="back" to={`/recipe/edit/${recipe.id}`}>Edit recipe</Link>
+                <Link className="back" to={`/recipe/edit/${recipe._id}`}>Edit recipe</Link>
                 <Link className="back" to='/'>Back</Link>
             </div>
         );

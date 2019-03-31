@@ -15,7 +15,7 @@ class EditRecipe extends Component {
         let recipe = this.props.recipe;
         this.setState({
             input: {
-                id: recipe.id,
+                _id: recipe._id,
                 title: this.refs.title.value ? this.refs.title.value : recipe.title,
                 description: this.refs.description.value ? this.refs.description.value : recipe.description,
                 ingredients: this.refs.ingredients.value ? this.refs.ingredients.value.split(", ") : recipe.ingredients,

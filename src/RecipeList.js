@@ -8,7 +8,7 @@ class RecipeList extends Component {
 
         this.props.recipes.forEach((elm) => {
             list.push(<li key={elm.title}>
-                <Link className="link" to={`/recipe/${elm.id}`}>{elm.title}</Link>
+                <Link className="link" to={`/recipe/${elm._id}`}>{elm.title}</Link>
             </li>)
         });
 

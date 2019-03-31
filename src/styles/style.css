@@ -11,6 +11,13 @@ h1 {
     margin: 0;
 }
 
+.logo {
+    padding: 0.75rem 1rem;
+    margin-left: 1.5em;
+    height: 2.5rem;
+    float: left;
+}
+
 .header {
     background-color: cadetblue;
     color: gainsboro;

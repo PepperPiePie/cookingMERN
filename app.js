@@ -25,8 +25,10 @@ app.use((req, res, next) => {
 
 /****** Mongoose *****/
 const mongoose = require('mongoose');
+
+const dbUrl = process.env.MONGO_URL;
 mongoose.connect(
-    'mongodb+srv://pepper123:pepper123@testercluster-2ubtg.mongodb.net/test?retryWrites=true',
+    `${dbUrl}`,
     { useNewUrlParser: true }
     // { useMongoClient: true } no longer needed in Mongoose 5.0, instead see line above
 );
@@ -47,6 +49,8 @@ let recipeSchema = new mongoose.Schema({
 });
 
 let Recipe = mongoose.model('Recipe', recipeSchema);
+
+
 
 const port = (process.env.PORT || 8080);
 

@@ -4,7 +4,6 @@ const app = express();
 app.use(bodyParser.json());
 
 /****** Configuration *****/
-const port = (process.env.PORT || 8080);
 
 // Additional headers to avoid triggering CORS security errors in the browser
 // Read more: https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
@@ -24,11 +23,37 @@ app.use((req, res, next) => {
     }
 });
 
-/****** Data *****/
-// TODO: Add some data
-const data = [
+/****** Mongoose *****/
+const mongoose = require('mongoose');
 
-];
+const dbUrl = process.env.MONGO_URL;
+mongoose.connect(
+    `${dbUrl}`,
+    { useNewUrlParser: true }
+    // { useMongoClient: true } no longer needed in Mongoose 5.0, instead see line above
+);
+
+let db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+    console.log("DB connection is open.");
+});
+
+let recipeSchema = new mongoose.Schema({
+    // id: Number,
+    title: String,
+    description: String,
+    ingredients: [String],
+    prep_time: Number,
+    total_time: Number
+});
+
+let Recipe = mongoose.model('Recipe', recipeSchema);
+
+
+
+const port = (process.env.PORT || 8080);
+
 
 /****** Helper functions *****/
 function getRecipeFromId(id) {
@@ -46,7 +71,62 @@ function findNextId() {
 }
 
 /****** Routes *****/
-// TODO: Croute route handlers!
+// GET
+app.get('/recipes/', (req, res) => {
+    //res.json(data)
+    Recipe.find({}, (err, recipes) => {
+        res.json(recipes);
+    }).sort({title: 1})
+});
+
+app.get('/recipes/:id', (req, res) => {
+    //res.json(data.filter(elm => elm.id === parseInt(req.params.id)));
+    //res.json({ msg: `You have sent this id: ${req.params.id}`});
+    Recipe.find({_id: req.params.id}, (err, recipes) => {
+        res.json(recipes);
+    })
+});
+
+app.get('/recipes/with/:ingredients', (req, res) => {
+    //res.json(data.filter((elm) => elm.ingredients.includes(req.params.ingredients)));
+    //res.json({ msg: `You have sent this ingredient: ${req.params.ingredients}`});
+    Recipe.find({ingredients: req.params.ingredients}, (err, recipes) => {
+        res.json(recipes);
+    })
+});
+
+
+// POST
+app.post('/recipes', (req, res) => {
+    let newRecipe = new Recipe({
+        //id: findNextId(),
+        title: req.body.title,
+        description: req.body.description,
+        ingredients: req.body.ingredients,
+        prep_time: req.body.prep_time,
+        total_time: req.body.total_time
+    });
+    if(!newRecipe.title || !newRecipe.description || !newRecipe.ingredients || !newRecipe.prep_time || !newRecipe.total_time) {
+        return res.status(400).json({ msg: 'Please include title, description, list of ingredients for recipe, as well as preparation and total time' });
+    }
+    /*newRecipe.save(err => {
+        if (err) return res.status(500).send(err);
+        return res.status(200).send(newRecipe);
+    });*/
+    newRecipe
+        .save()
+        .then(result => res.json({ msg: `You have posted this recipe: ${req.body.title}`}))
+        .catch(err => console.log(err));
+});
+
+
+// PUT
+app.put('/recipes/:id', (req, res) => {
+    Recipe.findOneAndUpdate({_id: req.params.id}, req.body, {new: true})
+        .then(function(recipe){res.send(recipe)})
+        .then(console.log(`Recipe ${req.body.title} was updated`))
+        .catch(err => console.log(err))
+});
 
 app.listen(port, () => console.log(`Cooking API running on port ${port}!`));
 
